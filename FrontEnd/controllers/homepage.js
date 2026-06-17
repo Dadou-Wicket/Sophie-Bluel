@@ -11,17 +11,14 @@ function displayProjects(projects) {
   galleryContainer.innerHTML = "";
   // Parcourt chaque projet à afficher
   for (const project of projects) {
-    // Crée la structure HTML d’un projet
     const figure = document.createElement("figure");
     const img = document.createElement("img");
     img.src = project.imageUrl;
     img.alt = project.title;
     const figcaption = document.createElement("figcaption");
     figcaption.textContent = project.title;
-    // Ajoute l’image et le titre dans la figure
     figure.appendChild(img);
     figure.appendChild(figcaption);
-    // Ajoute le projet complet dans la galerie
     galleryContainer.appendChild(figure);
   }
 }
@@ -45,11 +42,10 @@ for (const category of categories) {
   filterButton.textContent = category.name;
   filtersContainer.appendChild(filterButton);
 
-  /// Au clic sur un bouton de catégorie
   filterButton.addEventListener("click", function () {
-    // Retire l’état actif de tous les boutons
     const allButtons = document.querySelectorAll(".filters button");
     for (const button of allButtons) {
+      // Retire l’état actif de tous les boutons
       button.classList.remove("filter-button-active");
     }
     // Active visuellement le bouton cliqué

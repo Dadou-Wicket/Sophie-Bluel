@@ -287,3 +287,51 @@ footer nav ul {
   background-color: #1d6154;
   color: #ffffff;
 }
+
+label {
+  display: block;
+  font-family: "Work Sans";
+  font-size: 14px;
+  font-weight: 500;
+  color: #3d3d3d;
+  margin-bottom: 7px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+input {
+  width: 379px;
+  height: 51px;
+  box-shadow: 0px 4px 14px 0px #00000017;
+  margin-bottom: 30px;
+  border: none;
+}
+
+.submit-button {
+  background-color: #1d6154;
+  color: #ffffff;
+  font-family: "Syne";
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 60px;
+  width: 179px;
+  height: 36px;
+  border: none;
+  margin-bottom: 28px;
+}
+
+.login-main-container h2 {
+  padding-bottom: 37px;
+}
+
+.forgot-password {
+  display: block;
+  text-align: center;
+  font-size: 14px;
+  color: #3d3d3d;
+  text-decoration: underline;
+}
