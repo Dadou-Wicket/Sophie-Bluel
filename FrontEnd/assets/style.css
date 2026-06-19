@@ -127,6 +127,10 @@ table {
   border-collapse: collapse;
   border-spacing: 0;
 }
+a {
+  text-decoration: none;
+  color: inherit;
+}
 /** end reset css**/
 body {
   max-width: 1140px;
@@ -334,4 +338,11 @@ input {
   font-size: 14px;
   color: #3d3d3d;
   text-decoration: underline;
+}
+
+.error {
+  color: red;
+  font-size: 18px;
+  margin-top: 10px;
+  text-align: center;
 }
