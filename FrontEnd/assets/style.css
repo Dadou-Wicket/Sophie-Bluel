@@ -428,7 +428,8 @@ input {
   background-color: #ffffff;
   padding: 60px 105px 0 105px;
   width: 630px;
-  height: 688px;
+  height: 670px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -442,28 +443,30 @@ input {
   column-gap: 9px;
   row-gap: 29px;
   padding-top: 46px;
+  margin-bottom: 67px;
 }
 
-#modal-title {
+.modal-title {
   font-size: 26px;
   font-weight: 400;
   font-family: "Work Sans";
   color: #000000;
+  text-align: center;
 }
 
-.modal-item {
+.modal-project {
   position: relative;
   width: 76px;
   height: 102px;
 }
 
-.modal-item img {
+.modal-project img {
   object-fit: cover;
   width: 76px;
   height: 102px;
 }
 
-.modal-item i {
+.modal-project i {
   position: absolute;
   top: 5px;
   right: 5px;
@@ -478,7 +481,14 @@ input {
 hr {
   width: 420px;
   border: 1px solid #b3b3b3;
-  margin: 67px 0 38px 0;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  border: none;
+  background-color: #ffffff;
 }
 
 #add-photo-button {
@@ -491,13 +501,106 @@ hr {
   color: #ffffff;
   font-size: 14px;
   font-weight: 700;
+  display: block;
+  margin: 38px auto 0;
 }
 
-.modal-close {
-  position: absolute;
-  top: 26px;
-  right: 30px;
-  background: none;
+.modal-gallery-view {
+  display: block;
+}
+
+.modal-add-view {
+  display: none;
+}
+
+.upload-photo-container {
+  background-color: #e8f1f6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 36px;
+}
+
+#file-upload-button {
+  width: 173px;
+  height: 36px;
+  border-radius: 50px;
   border: none;
+  font-family: "Work Sans";
+  font-size: 14px;
+  font-weight: 500;
+  color: #306685;
+  background-color: #cbd6dc;
+}
+
+.upload-photo-container p {
+  font-family: "Work Sans";
+  font-size: 10px;
+  padding-bottom: 19px;
+}
+
+.upload-photo-container img {
+  width: 76px;
+  height: 76px;
+  padding-top: 13px;
+}
+
+.modal-back {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  border: none;
+  background-color: #ffffff;
+}
+
+.modal-back i {
+  font-size: 21px;
+}
+
+.modal-form label {
+  font-family: "Work Sans";
+  font-size: 14px;
+  font-weight: 500;
+  color: #3d3d3d;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-top: 30px;
+}
+
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
+  width: 420px;
+  height: 51px;
+  border: none;
+  box-shadow: 0px 4px 14px 0px #00000017;
+}
+.modal-form select {
+  margin-bottom: 47px;
+}
+
+#modal-form-submit-button {
+  width: 237px;
+  height: 36px;
+  border-radius: 60px;
+  border: none;
+  background-color: #a7a7a7;
+  font-family: "Syne";
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  display: block;
+  margin: 0 auto;
+  margin-top: 32px;
+}
+
+button,
+.modal-close,
+i {
   cursor: pointer;
 }

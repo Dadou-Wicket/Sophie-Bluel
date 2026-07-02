@@ -19,7 +19,7 @@ async function submitLoginForm(event) {
     return;
   }
 
-  // Sinon → affichage du message d’erreur
+  // Sinon affichage du message d’erreur
   const errorMsg = document.querySelector(".error");
 
   if (errorMsg) {

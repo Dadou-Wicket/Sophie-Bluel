@@ -1,5 +1,5 @@
 import { logout, isLogged } from "../api/auth.js";
-import { deleteItem } from "../api/project.js";
+import { deleteProject } from "../api/project.js";
 
 const worksResponse = await fetch("http://localhost:5678/api/works");
 let works = await worksResponse.json();
@@ -29,6 +29,7 @@ function displayProjects(projects) {
 // Affiche tous les projets au chargement de la page
 displayProjects(works);
 
+// ===== FILTER =====
 const filtersContainer = document.querySelector(".filters");
 
 // Création du bouton de filtre "Tous", non présent dans les données de l’API
@@ -90,8 +91,6 @@ function initLogoutButton() {
 
 initLogoutButton();
 
-// ===== EDIT MODE =====
-
 //Affiche la bannière et le bouton modifier seulement si l'utilisateur est connecté
 const editBanner = document.querySelector(".edit-banner");
 const editBtn = document.querySelector(".edit-btn");
@@ -123,8 +122,8 @@ const modalGallery = document.querySelector(".modal-gallery");
 
 if (modalGallery) {
   for (const work of works) {
-    const modalItem = document.createElement("div");
-    modalItem.classList.add("modal-item");
+    const modalProject = document.createElement("div");
+    modalProject.classList.add("modal-project");
 
     const img = document.createElement("img");
     img.src = work.imageUrl;
@@ -135,10 +134,10 @@ if (modalGallery) {
     deleteIcone.classList.add("fa-solid", "fa-trash-can");
     deleteIcone.dataset.id = work.id;
 
-    //Suppression de l'item séléctionné dans la modal
+    //Suppression du projet séléctionné dans la modal
     deleteIcone.addEventListener("click", async function () {
       const id = deleteIcone.dataset.id;
-      const success = await deleteItem(id);
+      const success = await deleteProject(id);
       if (success) {
         // Met à jour le tableau en retirant le projet supprimé
         works = works.filter(function (work) {
@@ -147,19 +146,21 @@ if (modalGallery) {
         // Met à jour l'affichage de la galerie principale
         displayProjects(works);
         // Supprime l'élément dans la modal
-        modalItem.remove();
+        modalProject.remove();
       }
     });
-    modalItem.appendChild(img);
-    modalItem.appendChild(deleteIcone);
-    modalGallery.appendChild(modalItem);
+    modalProject.appendChild(img);
+    modalProject.appendChild(deleteIcone);
+    modalGallery.appendChild(modalProject);
   }
 }
 
-//Fermeture de la modal en cliquant sur la croix
-const closeBtn = document.querySelector(".modal-close");
-closeBtn.addEventListener("click", function () {
-  modal.style.display = "none";
+// Fermeture de la modal en cliquant sur les croix
+const closeBtns = document.querySelectorAll(".modal-close");
+closeBtns.forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    modal.style.display = "none";
+  });
 });
 
 //Fermeture de la modal en cliquant à l'exterieur
@@ -168,3 +169,27 @@ modal.addEventListener("click", function (event) {
     modal.style.display = "none";
   }
 });
+
+// ===== Changement de vue dans la modal =====
+
+// Récupération des éléments
+const galleryView = document.querySelector(".modal-gallery-view");
+const addView = document.querySelector(".modal-add-view");
+const addPhotoBtn = document.querySelector("#add-photo-button");
+const backBtn = document.querySelector(".modal-back");
+
+// Au clic sur "Ajouter une photo", affiche le formulaire
+if (addPhotoBtn) {
+  addPhotoBtn.addEventListener("click", function () {
+    galleryView.style.display = "none";
+    addView.style.display = "block";
+  });
+}
+
+// Au clic sur la flèche retour, réaffiche la galerie
+if (backBtn) {
+  backBtn.addEventListener("click", function () {
+    addView.style.display = "none";
+    galleryView.style.display = "block";
+  });
+}
