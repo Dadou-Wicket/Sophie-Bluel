@@ -28,7 +28,6 @@ export async function login(email, password) {
 }
 
 export async function logout() {
-  // On supprime le token pour déconnecter l'utilisateur
   localStorage.removeItem("token");
 }
 

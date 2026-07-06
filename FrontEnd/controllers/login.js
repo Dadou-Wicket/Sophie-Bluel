@@ -2,33 +2,29 @@ import { login } from "../api/auth.js";
 
 const form = document.querySelector("#login-form");
 
-//Fonction de soumission du formulaire
+// Traite la soumission du formulaire de connexion
 async function submitLoginForm(event) {
-  event.preventDefault(); // empêche le rechargement de la page
-
-  // Récupération des valeurs du formulaire
+  // Empêche le rechargement de la page lors de l'envoi du formulaire
+  event.preventDefault();
+  // Récupère les informations saisies par l'utilisateur
   const email = document.querySelector("#email").value;
   const password = document.querySelector("#password").value;
-
-  // Appel de la fonction login
+  // Tente de connecter l'utilisateur
   const success = await login(email, password);
-
-  // Si connexion réussie → redirection
+  // Redirige l'utilisateur vers la page d'accueil si la connexion réussit
   if (success) {
     window.location.href = "index.html";
     return;
   }
 
-  // Sinon affichage du message d’erreur
+  // Affiche un message d'erreur si la connexion échoue
   const errorMsg = document.querySelector(".error");
-
   if (errorMsg) {
     errorMsg.textContent = "Erreur dans l’identifiant ou le mot de passe";
   }
 }
 
-// Ajout de l'écouteur d'événement sur le formulaire, quand l'utilisateur
-// clique sur "Envoyer", appelle la fonction submitLoginForm
+// Exécute la fonction de connexion lors de la soumission du formulaire
 if (form) {
   form.addEventListener("submit", submitLoginForm);
 }

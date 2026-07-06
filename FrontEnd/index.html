@@ -118,33 +118,44 @@
               <i class="fa-solid fa-xmark"></i>
             </button>
             <h2 class="modal-title">Ajout photo</h2>
-            <div class="upload-photo-container">
-              <img
-                src="assets/images/picture-svgrepo-com 1.png"
-                aria-hidden="true"
-              />
-              <button type="button" id="file-upload-button">
-                + Ajouter photo
-              </button>
-              <p>jpg, png : 4mo max</p>
-            </div>
-            <form class="modal-form">
-              <label for="title">Titre</label>
-              <input type="text" id="title" name="title" placeholder="" />
-              <label for="category">Catégorie</label>
-
-              <select name="category" id="category"></select>
-
-              <hr />
-              <button type="submit" id="modal-form-submit-button">
-                Valider
-              </button>
-            </form>
-          </div>
-        </div>
+            <!-- ===== UPLOAD ZONE ===== -->
+<div class="upload-photo-container">
+  <!-- PREVIEW IMAGE -->
+  <img
+    id="preview-image"
+    class="preview-image"
+    style="display: none"
+    alt="Aperçu de l’image sélectionnée"
+  />
+  <!-- ICONE PAR DÉFAUT -->
+  <img
+    id="default-icon"
+    src="assets/images/picture-svgrepo-com 1.png"
+    alt=""
+    aria-hidden="true"
+  />
+  <!-- INPUT FILE -->
+  <input type="file" id="image-input" accept="image/*" hidden />
+  <!-- BOUTON -->
+  <button type="button" id="file-upload-button">
+    + Ajouter photo
+  </button>
+  <p id="upload-text">jpg, png : 4mo max</p>
+</div>
+<!-- ===== FORM ===== -->
+<form class="modal-form">
+  <label for="title">Titre</label>
+  <input type="text" id="title" name="title" placeholder="" />
+  <label for="category">Catégorie</label>
+  <select name="category" id="category-select"></select>
+  <hr />
+  <button type="submit" id="modal-form-submit-button">
+    Valider
+  </button>
+    <p id="form-error"></p>
+</form>
       </aside>
     </main>
-
     <footer>
       <nav>
         <ul>

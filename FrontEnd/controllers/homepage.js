@@ -1,18 +1,64 @@
 import { logout, isLogged } from "../api/auth.js";
-import { deleteProject } from "../api/project.js";
+import { loadCategories } from "../api/category.js";
+import { deleteProject, addProject } from "../api/project.js";
 
 const worksResponse = await fetch("http://localhost:5678/api/works");
 let works = await worksResponse.json();
 const categoriesResponse = await fetch("http://localhost:5678/api/categories");
 const categories = await categoriesResponse.json();
 
+// =====================
+// DOM - Galerie
+// =====================
 const galleryContainer = document.querySelector(".gallery");
+const filtersContainer = document.querySelector(".filters");
 
-// Fonction qui affiche une liste de projets dans la galerie
+// =====================
+// DOM - Authentification
+// =====================
+const editBanner = document.querySelector(".edit-banner");
+const editBtn = document.querySelector(".edit-btn");
+const logoutBtn = document.querySelector("#logout");
+const loginBtn = document.querySelector("#login");
+const modal = document.querySelector(".modal");
+
+// =====================
+// DOM - Galerie de la modale
+// =====================
+const modalGallery = document.querySelector(".modal-gallery");
+const galleryView = document.querySelector(".modal-gallery-view");
+const addView = document.querySelector(".modal-add-view");
+const addPhotoBtn = document.querySelector("#add-photo-button");
+const backBtn = document.querySelector(".modal-back");
+const closeBtns = document.querySelectorAll(".modal-close");
+
+// =====================
+// DOM - Upload
+// =====================
+const uploadBtn = document.querySelector("#file-upload-button");
+const imageInput = document.querySelector("#image-input");
+const preview = document.querySelector("#preview-image");
+const defaultIcon = document.querySelector("#default-icon");
+const uploadText = document.querySelector("#upload-text");
+
+// =====================
+// DOM - Formulaire
+// =====================
+const modalForm = document.querySelector(".modal-form");
+const titleInput = document.querySelector("#title");
+const categorySelect = document.querySelector("#category-select");
+const submitBtn = document.querySelector("#modal-form-submit-button");
+const formError = document.querySelector("#form-error");
+
+// =====================
+// GALERIE PRINCIPALE
+// =====================
+
+// Affiche les projets reçus dans la galerie de la page d'accueil
 function displayProjects(projects) {
-  // Vide la galerie avant d’ajouter les nouveaux projets
+  // Supprime les projets actuellement affichés
   galleryContainer.innerHTML = "";
-  // Parcourt chaque projet à afficher
+  // Crée et ajoute un élément HTML pour chaque projet
   for (const project of projects) {
     const figure = document.createElement("figure");
     const img = document.createElement("img");
@@ -29,8 +75,9 @@ function displayProjects(projects) {
 // Affiche tous les projets au chargement de la page
 displayProjects(works);
 
-// ===== FILTER =====
-const filtersContainer = document.querySelector(".filters");
+// =====================
+// FILTRES
+// =====================
 
 // Création du bouton de filtre "Tous", non présent dans les données de l’API
 const allFilterButton = document.createElement("button");
@@ -46,19 +93,20 @@ for (const category of categories) {
   filterButton.textContent = category.name;
   filtersContainer.appendChild(filterButton);
 
+  // Filtre les projets selon la catégorie sélectionnée
   filterButton.addEventListener("click", function () {
     const allButtons = document.querySelectorAll(".filters button");
+    // Désactive l'état actif de tous les boutons de filtre
     for (const button of allButtons) {
-      // Retire l’état actif de tous les boutons
       button.classList.remove("filter-button-active");
     }
-    // Active visuellement le bouton cliqué
+    // Active visuellement le filtre sélectionné
     filterButton.classList.add("filter-button-active");
-    // Garde uniquement les projets de la catégorie sélectionnée
+    // Conserve uniquement les projets appartenant à la catégorie choisie
     const filteredWorks = works.filter(function (project) {
       return project.categoryId === category.id;
     });
-    // Affiche les projets filtrés dans la galerie
+    // Met à jour la galerie avec les projets filtrés
     displayProjects(filteredWorks);
   });
 }
@@ -73,17 +121,18 @@ allFilterButton.addEventListener("click", function () {
   displayProjects(works);
 });
 
-// ===== LOGIN / LOGOUT =====
+// =====================
+// AUTHENTIFICATION
+// =====================
+
+// Affiche le bon bouton selon l'état de connexion de l'utilisateur
 function initLogoutButton() {
-  const logoutBtn = document.querySelector("#logout");
-  const loginBtn = document.querySelector("#login");
-
-  if (!logoutBtn || !loginBtn) return;
-
+  // Si l'utilisateur est connecté, affiche "logout" et masque "login"
   if (isLogged()) {
     logoutBtn.classList.add("show");
     loginBtn.classList.remove("show");
   } else {
+    // Sinon, affiche "login" et masque "logout"
     loginBtn.classList.add("show");
     logoutBtn.classList.remove("show");
   }
@@ -92,104 +141,215 @@ function initLogoutButton() {
 initLogoutButton();
 
 //Affiche la bannière et le bouton modifier seulement si l'utilisateur est connecté
-const editBanner = document.querySelector(".edit-banner");
-const editBtn = document.querySelector(".edit-btn");
-const modal = document.querySelector(".modal");
-
 if (isLogged()) {
-  if (editBanner) editBanner.style.display = "flex";
-  if (editBtn) editBtn.style.display = "inline-flex";
-}
-
-// ouverture modal
-if (editBtn && modal) {
-  editBtn.addEventListener("click", function () {
-    modal.style.display = "flex";
-  });
+  editBanner.style.display = "flex";
+  editBtn.style.display = "inline-flex";
 }
 
 //Déconnecte lors du clic sur logout
-const logoutBtn = document.querySelector("#logout");
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", function () {
-    logout(); // supprime le token
-    window.location.href = "login.html"; // redirection
+logoutBtn.addEventListener("click", function () {
+  logout(); // supprime le token
+  window.location.href = "login.html"; // redirection
+});
+
+// =====================
+// MODALE
+// =====================
+
+// Affiche un projet dans la galerie de la modale
+function displayModalProject(work) {
+  const modalProject = document.createElement("div");
+  modalProject.classList.add("modal-project");
+
+  const img = document.createElement("img");
+  img.src = work.imageUrl;
+  img.alt = work.title;
+
+  // Ajoute une icône permettant de supprimer le projet
+  const deleteIcon = document.createElement("i");
+  deleteIcon.classList.add("fa-solid", "fa-trash-can");
+  deleteIcon.dataset.id = work.id;
+
+  // Supprime le projet de la base de données et met à jour les galeries
+  deleteIcon.addEventListener("click", async function () {
+    const id = deleteIcon.dataset.id;
+    const success = await deleteProject(id);
+    if (success) {
+      // Retire le projet du tableau des projets
+      works = works.filter(function (work) {
+        return work.id !== Number(id);
+      });
+      // Met à jour la galerie de la page d'accueil
+      displayProjects(works);
+      // Supprime le projet de la galerie de la modale
+      modalProject.remove();
+    }
   });
+  modalProject.appendChild(img);
+  modalProject.appendChild(deleteIcon);
+  modalGallery.appendChild(modalProject);
 }
 
-//Inclusion des projets dans la modal
-const modalGallery = document.querySelector(".modal-gallery");
-
-if (modalGallery) {
-  for (const work of works) {
-    const modalProject = document.createElement("div");
-    modalProject.classList.add("modal-project");
-
-    const img = document.createElement("img");
-    img.src = work.imageUrl;
-    img.alt = work.title;
-
-    //Création icone de suppression
-    const deleteIcone = document.createElement("i");
-    deleteIcone.classList.add("fa-solid", "fa-trash-can");
-    deleteIcone.dataset.id = work.id;
-
-    //Suppression du projet séléctionné dans la modal
-    deleteIcone.addEventListener("click", async function () {
-      const id = deleteIcone.dataset.id;
-      const success = await deleteProject(id);
-      if (success) {
-        // Met à jour le tableau en retirant le projet supprimé
-        works = works.filter(function (work) {
-          return work.id !== Number(id);
-        });
-        // Met à jour l'affichage de la galerie principale
-        displayProjects(works);
-        // Supprime l'élément dans la modal
-        modalProject.remove();
-      }
-    });
-    modalProject.appendChild(img);
-    modalProject.appendChild(deleteIcone);
-    modalGallery.appendChild(modalProject);
-  }
+// Affiche tous les projets dans la galerie de la modale au chargement de la page
+for (const work of works) {
+  displayModalProject(work);
 }
 
-// Fermeture de la modal en cliquant sur les croix
-const closeBtns = document.querySelectorAll(".modal-close");
+// Ferme la modale lorsqu'on clique sur la croix de fermeture
 closeBtns.forEach(function (btn) {
   btn.addEventListener("click", function () {
     modal.style.display = "none";
   });
 });
 
-//Fermeture de la modal en cliquant à l'exterieur
+// Ferme la modale lorsqu'on clique en dehors de son contenu
 modal.addEventListener("click", function (event) {
   if (event.target === modal) {
     modal.style.display = "none";
   }
 });
 
-// ===== Changement de vue dans la modal =====
+// =====================
+// CHANGEMENT DE VUE DE LA MODALE
+// =====================
 
-// Récupération des éléments
-const galleryView = document.querySelector(".modal-gallery-view");
-const addView = document.querySelector(".modal-add-view");
-const addPhotoBtn = document.querySelector("#add-photo-button");
-const backBtn = document.querySelector(".modal-back");
+// Affiche le formulaire d'ajout de projet
+addPhotoBtn.addEventListener("click", function () {
+  galleryView.style.display = "none";
+  addView.style.display = "block";
+});
 
-// Au clic sur "Ajouter une photo", affiche le formulaire
-if (addPhotoBtn) {
-  addPhotoBtn.addEventListener("click", function () {
-    galleryView.style.display = "none";
-    addView.style.display = "block";
-  });
+// Revient à la galerie des projets
+backBtn.addEventListener("click", function () {
+  addView.style.display = "none";
+  galleryView.style.display = "block";
+});
+
+editBtn.addEventListener("click", function () {
+  // Affiche la modale
+  modal.style.display = "flex";
+  // Affiche la vue Galerie et masque le formulaire d'ajout
+  galleryView.style.display = "block";
+  addView.style.display = "none";
+  // Recharge la liste des catégories
+  loadCategories();
+  // Réinitialise le formulaire d'ajout
+  resetForm();
+});
+
+// =====================
+// UPLOAD D'IMAGE
+// =====================
+
+// Ouvre l'explorateur de fichiers au clic sur le bouton "Ajouter photo"
+uploadBtn.addEventListener("click", function () {
+  imageInput.click();
+});
+
+// Affiche une prévisualisation de l'image sélectionnée
+imageInput.addEventListener("change", function () {
+  const file = imageInput.files[0];
+  // Arrête la fonction si aucun fichier n'a été sélectionné
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    // Affiche l'image sélectionnée dans la zone de prévisualisation
+    preview.src = event.target.result;
+    preview.style.display = "block";
+    // Masque les éléments de la zone d'upload
+    defaultIcon.style.display = "none";
+    uploadBtn.style.display = "none";
+    uploadText.style.display = "none";
+    // Met à jour l'apparence du bouton Valider
+    updateSubmitButton();
+  };
+  // Convertit le fichier sélectionné en URL lisible par le navigateur
+  reader.readAsDataURL(file);
+});
+
+// =====================
+// VALIDATION DU FORMULAIRE
+// =====================
+
+// Vérifie que tous les champs obligatoires du formulaire sont renseignés
+function isFormValid() {
+  const title = titleInput.value.trim();
+  const category = categorySelect.value;
+  const image = imageInput.files[0];
+  return image && title !== "" && category !== "";
 }
 
-// Au clic sur la flèche retour, réaffiche la galerie
-if (backBtn) {
-  backBtn.addEventListener("click", function () {
-    addView.style.display = "none";
-    galleryView.style.display = "block";
-  });
+// Modifie la couleur du bouton "Valider" selon l'état du formulaire
+function updateSubmitButton() {
+  if (isFormValid()) {
+    submitBtn.style.backgroundColor = "#1D6154";
+  } else {
+    submitBtn.style.backgroundColor = "#A7A7A7";
+  }
+}
+
+// Vérifie le formulaire à chaque modification du titre
+titleInput.addEventListener("input", function () {
+  updateSubmitButton();
+});
+
+// Vérifie le formulaire à chaque changement de catégorie
+categorySelect.addEventListener("change", function () {
+  updateSubmitButton();
+});
+
+// Initialise l'apparence du bouton au chargement de la page
+updateSubmitButton();
+
+// =====================
+// AJOUT D'UN PROJET
+// =====================
+
+// Ajoute un nouveau projet lorsque le formulaire est validé
+modalForm.addEventListener("submit", async function (event) {
+  // Empêche le rechargement de la page
+  event.preventDefault();
+  // Vérifie que tous les champs obligatoires sont remplis
+  if (!isFormValid()) {
+    formError.textContent =
+      "Veuillez sélectionner une image, saisir un titre et choisir une catégorie.";
+    return;
+  }
+  // Efface le message d'erreur
+  formError.textContent = "";
+  // Prépare les données à envoyer à l'API
+  const formData = new FormData();
+  formData.append("image", imageInput.files[0]);
+  formData.append("title", titleInput.value.trim());
+  formData.append("category", categorySelect.value);
+  // Envoie le nouveau projet à l'API
+  const newProject = await addProject(formData);
+  // Ajoute le projet au tableau local
+  works.push(newProject);
+  // Met à jour la galerie de la page d'accueil
+  displayProjects(works);
+  // Ajoute le projet dans la galerie de la modale
+  displayModalProject(newProject);
+  // Réinitialise le formulaire
+  resetForm();
+  // Revient à la vue Galerie de la modale
+  addView.style.display = "none";
+  galleryView.style.display = "block";
+});
+
+// =====================
+// RÉINITIALISATION DU FORMULAIRE
+// =====================
+
+// Remet le formulaire dans son état initial
+function resetForm() {
+  modalForm.reset();
+  imageInput.value = "";
+  preview.style.display = "none";
+  defaultIcon.style.display = "block";
+  uploadBtn.style.display = "block";
+  uploadText.style.display = "block";
+  formError.textContent = "";
+  categorySelect.selectedIndex = 0;
+  updateSubmitButton();
 }
