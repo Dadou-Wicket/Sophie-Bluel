@@ -130,12 +130,12 @@
   <!-- ICONE PAR DÉFAUT -->
   <img
     id="default-icon"
-    src="assets/images/picture-svgrepo-com 1.png"
+    src="assets/icons/picture-svgrepo-com 1.png"
     alt=""
     aria-hidden="true"
   />
   <!-- INPUT FILE -->
-  <input type="file" id="image-input" accept="image/*" aria-describedby="upload-text"hidden/>
+  <input type="file" id="image-input" accept="image/*" aria-label="Choisir une image" aria-describedby="upload-text" hidden/>
   <!-- BOUTON -->
   <button type="button" id="file-upload-button">
     + Ajouter photo
@@ -143,16 +143,16 @@
   <p id="upload-text">jpg, png : 4mo max</p>
 </div>
 <!-- ===== FORM ===== -->
-<form class="modal-form">
+<form class="modal-form" aria-label="Formulaire d'ajout d'un projet">
   <label for="title">Titre</label>
-  <input type="text" id="title" name="title" placeholder="" />
+  <input type="text" id="title" name="title" />
   <label for="category-select">Catégorie</label>
   <select name="category" id="category-select"></select>
   <hr />
   <button type="submit" id="modal-form-submit-button">
     Valider
   </button>
-<p id="form-error" aria-live="polite" aria-atomic="true"></p>
+<p id="form-error" role="alert" aria-live="polite" aria-atomic="true"></p>
 </form>
       </aside>
     </main>

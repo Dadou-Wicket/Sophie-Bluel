@@ -279,6 +279,7 @@ li:hover {
 #contact textarea {
   border: none;
   box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.09);
+  width: 379px;
 }
 
 input[type="submit"] {
@@ -356,7 +357,6 @@ input {
   width: 179px;
   height: 36px;
   border: none;
-  margin-bottom: 28px;
   cursor: pointer;
 }
 
@@ -370,6 +370,7 @@ input {
   font-size: 14px;
   color: #3d3d3d;
   text-decoration: underline;
+  margin-top: 28px;
 }
 
 .error {
@@ -541,6 +542,7 @@ hr {
   font-weight: 500;
   color: #306685;
   background-color: #cbd6dc;
+  margin-bottom: 7px;
 }
 
 .upload-photo-container p {

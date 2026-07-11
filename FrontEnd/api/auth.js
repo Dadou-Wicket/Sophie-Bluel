@@ -13,7 +13,7 @@ export async function login(email, password) {
     });
     // Si la réponse du serveur est OK
     if (response.ok) {
-      // on récupère les données renvoyées par l'API (token)
+      // On récupère les données renvoyées par l'API (token)
       let data = await response.json();
       // On stocke le token dans le localStorage pour garder l'utilisateur connecté
       localStorage.setItem("token", data.token);

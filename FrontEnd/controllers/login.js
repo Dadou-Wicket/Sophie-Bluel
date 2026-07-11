@@ -9,7 +9,7 @@ async function submitLoginForm(event) {
   // Récupère les informations saisies par l'utilisateur
   const email = document.querySelector("#email").value;
   const password = document.querySelector("#password").value;
-  // Tente de connecter l'utilisateur
+  // Envoie les identifiants à l'API afin de tenter la connexion
   const success = await login(email, password);
   // Redirige l'utilisateur vers la page d'accueil si la connexion réussit
   if (success) {

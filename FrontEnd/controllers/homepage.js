@@ -1,11 +1,9 @@
 import { logout, isLogged } from "../api/auth.js";
 import { loadCategories } from "../api/category.js";
-import { deleteProject, addProject } from "../api/project.js";
+import { deleteProject, addProject, fetchProjects } from "../api/project.js";
 
-const worksResponse = await fetch("http://localhost:5678/api/works");
-let works = await worksResponse.json();
-const categoriesResponse = await fetch("http://localhost:5678/api/categories");
-const categories = await categoriesResponse.json();
+let works = await fetchProjects();
+const categories = await loadCategories();
 
 // =====================
 // DOM - Galerie
@@ -92,7 +90,6 @@ for (const category of categories) {
   filterButton.type = "button";
   filterButton.textContent = category.name;
   filtersContainer.appendChild(filterButton);
-
   // Filtre les projets selon la catégorie sélectionnée
   filterButton.addEventListener("click", function () {
     const allButtons = document.querySelectorAll(".filters button");
@@ -104,7 +101,7 @@ for (const category of categories) {
     filterButton.classList.add("filter-button-active");
     // Conserve uniquement les projets appartenant à la catégorie choisie
     const filteredWorks = works.filter(function (project) {
-      return project.categoryId === category.id;
+      return Number(project.categoryId) === category.id;
     });
     // Met à jour la galerie avec les projets filtrés
     displayProjects(filteredWorks);
@@ -156,30 +153,41 @@ logoutBtn.addEventListener("click", function () {
 // MODALE
 // =====================
 
-// Affiche un projet dans la galerie de la modale
+// Ouverture de la modale
+editBtn.addEventListener("click", function () {
+  modal.style.display = "flex";
+  galleryView.style.display = "block";
+  addView.style.display = "none";
+  // Recharge la liste des catégories
+  initCategories();
+  // Réinitialise le formulaire d'ajout
+  resetForm();
+});
+
+// Crée un projet dans la galerie de la modale
 function displayModalProject(work) {
   const modalProject = document.createElement("div");
   modalProject.classList.add("modal-project");
-
   const img = document.createElement("img");
   img.src = work.imageUrl;
   img.alt = work.title;
-
-  // Ajoute une icône permettant de supprimer le projet
+  // Crée l'icône permettant de supprimer ce projet
   const deleteIcon = document.createElement("i");
   deleteIcon.classList.add("fa-solid", "fa-trash-can");
   deleteIcon.dataset.id = work.id;
-
-  // Supprime le projet de la base de données et met à jour les galeries
+  // Supprime le projet lorsqu'on clique sur l'icône
   deleteIcon.addEventListener("click", async function () {
+    // Récupère l'identifiant du projet à supprimer
     const id = deleteIcon.dataset.id;
+    // Envoie une requête DELETE à l'API
     const success = await deleteProject(id);
+    // Met à jour l'interface uniquement si la suppression a réussi
     if (success) {
-      // Retire le projet du tableau des projets
+      // Retire le projet du tableau des projets chargés
       works = works.filter(function (work) {
         return work.id !== Number(id);
       });
-      // Met à jour la galerie de la page d'accueil
+      // Reconstruit la galerie de la page d'accueil
       displayProjects(works);
       // Supprime le projet de la galerie de la modale
       modalProject.remove();
@@ -225,17 +233,29 @@ backBtn.addEventListener("click", function () {
   galleryView.style.display = "block";
 });
 
-editBtn.addEventListener("click", function () {
-  // Affiche la modale
-  modal.style.display = "flex";
-  // Affiche la vue Galerie et masque le formulaire d'ajout
-  galleryView.style.display = "block";
-  addView.style.display = "none";
-  // Recharge la liste des catégories
-  loadCategories();
-  // Réinitialise le formulaire d'ajout
-  resetForm();
-});
+function initCategories() {
+  // Récupère la liste déroulante des catégories
+  const select = document.querySelector("#category-select");
+  // Arrête la fonction si la liste déroulante est introuvable
+  if (!select) return;
+  // Supprime les catégories actuellement affichées
+  select.innerHTML = "";
+  // Ajoute une option vide affichée par défaut
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = "";
+  defaultOption.disabled = true;
+  defaultOption.selected = true;
+  select.appendChild(defaultOption);
+
+  // Ajoute chaque catégorie récupérée dans la liste déroulante
+  for (const category of categories) {
+    const option = document.createElement("option");
+    option.value = category.id;
+    option.textContent = category.name;
+    select.appendChild(option);
+  }
+}
 
 // =====================
 // UPLOAD D'IMAGE
@@ -273,9 +293,9 @@ imageInput.addEventListener("change", function () {
 
 // Vérifie que tous les champs obligatoires du formulaire sont renseignés
 function isFormValid() {
+  const image = imageInput.files[0];
   const title = titleInput.value.trim();
   const category = categorySelect.value;
-  const image = imageInput.files[0];
   return image && title !== "" && category !== "";
 }
 
@@ -288,17 +308,17 @@ function updateSubmitButton() {
   }
 }
 
-// Vérifie le formulaire à chaque modification du titre
+// Met à jour le bouton lorsque le titre est modifié
 titleInput.addEventListener("input", function () {
   updateSubmitButton();
 });
 
-// Vérifie le formulaire à chaque changement de catégorie
+// Met à jour le bouton lorsqu'une catégorie est sélectionnée
 categorySelect.addEventListener("change", function () {
   updateSubmitButton();
 });
 
-// Initialise l'apparence du bouton au chargement de la page
+// Initialise l'état du bouton au chargement de la page
 updateSubmitButton();
 
 // =====================
@@ -317,22 +337,22 @@ modalForm.addEventListener("submit", async function (event) {
   }
   // Efface le message d'erreur
   formError.textContent = "";
-  // Prépare les données à envoyer à l'API
+  // Crée un objet FormData contenant les données du formulaire
   const formData = new FormData();
   formData.append("image", imageInput.files[0]);
   formData.append("title", titleInput.value.trim());
   formData.append("category", categorySelect.value);
-  // Envoie le nouveau projet à l'API
+  // Envoie les données du formulaire à l'API afin de créer un nouveau projet
   const newProject = await addProject(formData);
-  // Ajoute le projet au tableau local
+  // Ajoute le projet créé au tableau des projets déjà chargés
   works.push(newProject);
-  // Met à jour la galerie de la page d'accueil
+  // Reconstruit la galerie de la page d'accueil avec le nouveau projet
   displayProjects(works);
-  // Ajoute le projet dans la galerie de la modale
+  // Ajoute le nouveau projet dans la galerie de la modale
   displayModalProject(newProject);
-  // Réinitialise le formulaire
+  // Réinitialise le formulaire d'ajout
   resetForm();
-  // Revient à la vue Galerie de la modale
+  // Réaffiche la galerie de la modale
   addView.style.display = "none";
   galleryView.style.display = "block";
 });
