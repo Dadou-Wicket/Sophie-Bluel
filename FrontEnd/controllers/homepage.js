@@ -141,6 +141,7 @@ initLogoutButton();
 if (isLogged()) {
   editBanner.style.display = "flex";
   editBtn.style.display = "inline-flex";
+  filtersContainer.remove();
 }
 
 //Déconnecte lors du clic sur logout
@@ -283,7 +284,7 @@ imageInput.addEventListener("change", function () {
     // Met à jour l'apparence du bouton Valider
     updateSubmitButton();
   };
-  // Convertit le fichier sélectionné en URL lisible par le navigateur
+  // Convertit le fichier sélectionné en URL temporaire lisible par le navigateur
   reader.readAsDataURL(file);
 });
 
